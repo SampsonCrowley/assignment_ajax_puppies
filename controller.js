@@ -6,11 +6,13 @@ PUPPIES.Controller = (function(model, view) {
 
   var init = function() {
     model.init();
-    view.init();
-    // do {
-      console.log("in while");
-      view.renderPuppies(model.getPuppies());
-    // } while (model.getPuppies().length === 0);
+    view.init({
+      adopt: model.adopt,
+      register: model.register
+    });
+    model.puppies(function(puppies, breeds){
+      view.render(puppies, breeds);
+    })
   };
 
   return {

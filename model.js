@@ -4,7 +4,7 @@ var PUPPIES = PUPPIES || {};
 
 PUPPIES.Model = (function($) {
 
-  var puppies = [];
+  var puppies = [], breeds = [];
 
   var init = function() {
     _requestPuppies();
@@ -16,31 +16,52 @@ PUPPIES.Model = (function($) {
     });
   };
 
-  var getPuppies = function() {
-    return puppies || _requestPuppies();
+  var _requestBreeds = function() {
+    return $.ajax('https://ajax-puppies.herokuapp.com/breeds.json', {
+      dataType: 'JSON'
+    });
   };
 
-  var createPuppy = function(name, breedId) {
-    $.ajax('https://ajax-puppies.herokuapp.com/puppies.json', {
+  var getBreeds = function(cb) {
+    (breeds.length > 0 ? cb(puppies, breeds) : _requestBreeds().then(function(newBreeds){
+      // for(var i = 0; i < newBreeds.length; i++){
+      //   breeds[newBreeds[i].id] = newBreeds[i]
+      // }
+      breeds = newBreeds
+      cb(puppies, breeds)
+    }))
+  };
+
+  var getPuppies = function(cb) {
+    (puppies.length > 0 ? getBreeds(cb) : _requestPuppies().then(function(newPuppies){
+      puppies = newPuppies
+      getBreeds(cb);
+    }))
+  };
+
+  var createPuppy = function(name, breedId, cb) {
+    return $.ajax('https://ajax-puppies.herokuapp.com/puppies.json', {
       method: 'POST',
-
-      success: function(response, status, xhrobj) {
-        puppies.push(JSON.parse(response));
-      },
-
+      dataType: 'json',
       data: {
         name: name,
         breed_id: breedId
+      },
+      headers: {
+        "Content-type": "application/json"
+      },
+      success: function(puppy){
+        puppies.push(JSON.parse(response));
+        getPuppies(cb)
       }
     });
   };
 
   var deletePuppy = function(puppyId) {
-    $.ajax('https://ajax-puppies.herokuapp.com/puppies/' + puppyId + '.json', {
+    return $.ajax('https://ajax-puppies.herokuapp.com/puppies/' + puppyId + '.json', {
       method: 'DELETE',
-
       success: function(response, status, xhrobj) {
-        var index = puppies.indexOf(JSON.parse(response));
+        var index = puppies.indexOf(response);
         puppies.splice(index, 1);
       }
 
@@ -49,9 +70,9 @@ PUPPIES.Model = (function($) {
 
   return {
     init: init,
-    getPuppies: getPuppies,
-    createPuppy: createPuppy,
-    deletePuppy: deletePuppy
+    puppies: getPuppies,
+    register: createPuppy,
+    adopt: deletePuppy,
   };
 
 })($);
