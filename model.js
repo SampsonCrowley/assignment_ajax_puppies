@@ -39,20 +39,16 @@ PUPPIES.Model = (function($) {
     }))
   };
 
-  var createPuppy = function(name, breedId, cb) {
+  var createPuppy = function(data, cb) {
     return $.ajax('https://ajax-puppies.herokuapp.com/puppies.json', {
       method: 'POST',
       dataType: 'json',
-      data: {
-        name: name,
-        breed_id: breedId
-      },
+      data: data,
       headers: {
         "Content-type": "application/json"
       },
       success: function(puppy){
-        puppies.push(JSON.parse(response));
-        getPuppies(cb)
+        puppies.push(puppy);
       }
     });
   };

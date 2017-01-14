@@ -30,10 +30,12 @@ PUPPIES.View = (function() {
       newPuppy.submit(function(e){
         e.preventDefault();
         var formData = {};
+
         $.each(newPuppy.serializeArray(), function(_, kv){
           formData[kv.name] = kv.value;
         })
-        if(formData.name && formData.breed){
+        if(formData.name && formData.breed_id){
+          console.log(formData)
           cb.register(JSON.stringify(formData)).then(function(puppy){
             renderPuppy(puppy);
           })
